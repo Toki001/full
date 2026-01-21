@@ -11,6 +11,7 @@ const App = () => {
   const [newNumber, setNewNumber] = useState('')
   const [filter, setFilter] = useState('')
   const [message, setMessage] = useState(null)
+  const [messageType, setMessageType] = useState(null)
 
   useEffect(() => {
     personService
@@ -20,8 +21,9 @@ const App = () => {
       })
   }, [])
 
-  const showMessage = (text) => {
+  const showMessage = (text, type = 'success') => {
     setMessage(text)
+    setMessageType(type)
     setTimeout(() => {
       setMessage(null)
     }, 5000)
@@ -46,7 +48,12 @@ const App = () => {
             ))
             setNewName('')
             setNewNumber('')
-            showMessage(`Changed '${returnedPerson.name}'s number`)
+            showMessage(`Changed '${returnedPerson.name}'s number`, 'success')
+          })
+          .catch(error => {
+            showMessage(
+              `Information of '${existingPerson.name}' has already been removed from server.`, 'error'
+            )
           })
       } 
     } else {
@@ -61,7 +68,7 @@ const App = () => {
           setPersons(persons.concat(returnedPerson))
           setNewName('')
           setNewNumber('')
-          showMessage(`Added '${personObject.name}'`)
+          showMessage(`Added '${personObject.name}'`, 'success')
         })
     }
   }
@@ -84,7 +91,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
-      <Notification message={message} />
+      <Notification message={message} type={messageType}/>
       <Filter filter={filter} onChange={handleFilter} />
       <h3>Add a new</h3>
       <PersonForm 
