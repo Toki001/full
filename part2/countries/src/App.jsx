@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react'
 import countriesService from './services/countries'
+import axios from 'axios'
 
-const CountryDetails = ({ country }) => {
+const api_key = import.meta.env.VITE_SOME_KEY
+
+const CountryDetails = ({ country, weather }) => {
   return( 
     <div>
         <h1>{country.name.common}</h1>
@@ -12,6 +15,18 @@ const CountryDetails = ({ country }) => {
           {Object.values(country.languages).map((name) => <li key={name}>{name}</li>)}
         </ul>
         <img src={country.flags.png} style={{ height: '200px' }} alt="flag" />
+        
+        {weather && weather.main && (
+          <div>
+            <h2>Weather in {country.capital}</h2>
+            <div>Temperature: {weather.main.temp} °C</div>
+            <img 
+              src={`https://openweathermap.org/img/wn/${weather.weather[0].icon}@2x.png`} 
+              alt={weather.weather[0].description} 
+            />
+            <div>Wind: {weather.wind.speed} m/s</div>
+          </div>
+        )}
     </div>
   )
 }
@@ -39,6 +54,7 @@ const App = () => {
   const [countries, setCountries] = useState([])
   const [query, setQuery] = useState('')
   const [selected, setSelected] =useState(null)
+  const [weather, setWeather] = useState(null)
 
   useEffect(() => {
     countriesService
@@ -48,12 +64,33 @@ const App = () => {
       })
   }, [])
 
+  useEffect(() => {
+    if (!selected || !selected.capital || selected.capital.length === 0) return
+
+    const capital = selected.capital[0]
+    const lat = selected.capitalInfo?.latlng?.[0]
+    const lon = selected.capitalInfo?.latlng?.[1]
+
+    if (lat && lon) {
+      axios
+        .get(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${api_key}&units=metric`)
+        .then(response => {
+          setWeather(response.data)
+        })
+        .catch((error) => {
+          console.error('Weather fetch failed', error)
+          setWeather(null)
+        })
+    }
+  }, [selected])
+
   const countriesFilter = countries.filter(country => 
     country.name.common.toLowerCase().includes(query.toLowerCase())
   )
   const handleQuery = (event) => {
     setQuery(event.target.value)
     setSelected(null)
+    setWeather(null)
   }
 
 
@@ -62,7 +99,7 @@ const App = () => {
       <div>find countries <input value={query} onChange={handleQuery}/></div>
       {
         selected
-          ? <CountryDetails country={selected} />
+          ? <CountryDetails country={selected} weather={weather} />
           : <CountriesToShow countriesFilter={countriesFilter} setSelected={setSelected} />
       }
     </div>
