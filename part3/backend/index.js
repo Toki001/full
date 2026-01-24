@@ -24,9 +24,15 @@ let persons = [
       "number": "39-23-6423122"
     }
 ]
-
-app.get('/', (request, response) => {
-    response.send('<h1>Hello World!</h1>')
+app.get('/info', (request, response) => {
+    const personsCount = persons.length
+    const currentTime = new Date()
+    response.send(`
+        <div>
+            <p>Phonebook has info for ${personsCount} people</p>
+            <p>${currentTime}</p>
+        </div>
+    `)
 })
 
 app.get('/api/persons', (request, response) => {
