@@ -40,7 +40,7 @@ app.get('/api/persons', (request, response) => {
 })
 
 app.get('/api/persons/:id', (request, response) => {
-    const id = Number(request.params.id)
+    const id = request.params.id
     const person = persons.find(person => person.id == id)
     
     if (person) {
@@ -52,10 +52,10 @@ app.get('/api/persons/:id', (request, response) => {
 })
 
 app.delete('/api/persons/:id', (request, response) => {
-    const id = Number(request.params.id)
+    const id = request.params.id
     persons = persons.filter(person => person.id !== id)
 
-    response.status(204).end
+    response.status(204).end()
 })
 
 const generateRandomId = () => {
@@ -66,10 +66,26 @@ const generateRandomId = () => {
 app.post('/api/persons', (request, response) => {
     const body = request.body
     
+    if(!body.name) {
+        return response.status(400).json({
+            error: 'name is missing'
+        })
+    }
+    if(!body.number) {
+        return response.status(400).json({
+            error: 'number is missing'
+        })
+    }
+    if(persons.find(person => person.name === body.name)) {
+        return response.status(400).json({
+            error: 'name must be unique'
+        })
+    }
+
     const person = {
         id: generateRandomId(),
         name: body.name,
-        numner: body.number,
+        number: body.number,
     }
 
     persons = persons.concat(person)
