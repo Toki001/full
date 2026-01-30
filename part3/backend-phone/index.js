@@ -40,14 +40,15 @@ let persons = [
     }
 ]
 app.get('/info', (request, response) => {
-    const personsCount = persons.length
-    const currentTime = new Date()
+    Person.countDocuments({}).then(count => 
+    {const currentTime = new Date()
     response.send(`
         <div>
-            <p>Phonebook has info for ${personsCount} people</p>
+            <p>Phonebook has info for ${count} people</p>
             <p>${currentTime}</p>
         </div>
-    `)
+     `)
+    })
 })
 
 app.get('/api/persons', (request, response, next) => {
