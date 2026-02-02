@@ -70,6 +70,9 @@ const App = () => {
           setNewNumber('')
           showMessage(`Added '${personObject.name}'`, 'success')
         })
+        .catch(error => {
+          console.log(error.response.data.error)
+        })
     }
   }
 
